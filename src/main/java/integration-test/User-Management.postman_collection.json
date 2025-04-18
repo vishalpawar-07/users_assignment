@@ -1,0 +1,434 @@
+{
+	"info": {
+		"_postman_id": "05ec04c7-9e7b-4d4e-97ec-03e5e158c2a4",
+		"name": "User-Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43605356"
+	},
+	"item": [
+		{
+			"name": "Token Generation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var data;",
+							"try {",
+							"    data = pm.response.json();",
+							"    pm.environment.set(\"authToken\", data.access_token);",
+							"} catch (e) {",
+							"    console.log(\"Failed to parse token response:\", e);",
+							"}",
+							"pm.test(\"Status code is 200 Created\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "password",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "user-management-api",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "xjLDlo9SKNBXqrCSC3KMMfnqJ18mX0jg",
+							"type": "text"
+						},
+						{
+							"key": "username",
+							"value": "adminuser",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "admin@123",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/realms/user-management-realm/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"realms",
+						"user-management-realm",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Insert User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();",
+							"pm.environment.set(\"userId\", res.id);",
+							"",
+							"pm.test(\"Status code is 200 Created\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response contains user fields\", () => {",
+							"    const res = pm.response.json();",
+							"    pm.expect(res).to.have.property(\"id\");",
+							"    pm.expect(res).to.have.property(\"firstName\", \"yyy\");",
+							"    pm.expect(res).to.have.property(\"email\", \"yyy@gmail.com\");",
+							"});",
+							"",
+							"// pm.test(\"Status code is 400 Bad Request\", () => {",
+							"//     pm.response.to.have.status(400);",
+							"// });",
+							"",
+							"// pm.test(\"Error message present\", () => {",
+							"//     const res = pm.response.json();",
+							"//     pm.expect(res).to.have.property(\"error\");",
+							"// });"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"firstName\": \"yyy\",\n        \"lastName\": \"sfssa\",\n        \"email\": \"yyy@gmail.com\",\n        \"phoneNumber\": \"9879067123\",\n        \"createdAt\": \"2025-04-16T20:19:13\",\n        \"updatedAt\": \"2025-04-16T20:19:13\"\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response is an array\", () => {",
+							"    const res = pm.response.json();",
+							"    pm.expect(res).to.be.an(\"array\");",
+							"    if (res.length > 0) {",
+							"        pm.expect(res[0]).to.have.property(\"id\");",
+							"        pm.expect(res[0]).to.have.property(\"email\");",
+							"    }",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer <your-access-token>"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/users",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User object has required fields\", () => {",
+							"    const res = pm.response.json();",
+							"    pm.expect(res).to.have.property(\"id\");",
+							"    pm.expect(res).to.have.property(\"email\");",
+							"});",
+							"",
+							"// pm.test(\"Status code is 404 Not Found\", () => {",
+							"//     pm.response.to.have.status(404);",
+							"// });",
+							"",
+							"// pm.test(\"Error message present\", () => {",
+							"//     const res = pm.response.json();",
+							"//     pm.expect(res).to.have.property(\"error\");",
+							"// });",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users/{{userId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 OK\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Updated fields returned\", () => {",
+							"    const res = pm.response.json();",
+							"    pm.expect(res).to.have.property(\"phoneNumber\", \"7776677777\");",
+							"});",
+							"",
+							"",
+							"// pm.test(\"Status code is 404 Not Found\", () => {",
+							"//     pm.response.to.have.status(404);",
+							"// });",
+							"",
+							"// pm.test(\"Error message present\", () => {",
+							"//     const res = pm.response.json();",
+							"//     pm.expect(res).to.have.property(\"error\");",
+							"// });",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"firstName\": \"Maendra\",\n    \"lastName\": \"Dhoni\",\n    \"email\": \"Mhenda@gmail.com\",\n    \"phoneNumber\": \"7776677777\",\n    \"createdAt\": \"2025-04-16T14:44:37\",\n    \"updatedAt\": \"2025-04-16T14:44:37\"\n    \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/api/users/{{userId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User By ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 No Content\", () => {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"",
+							"// pm.test(\"Status code is 404 Not Found\", () => {",
+							"//     pm.response.to.have.status(404);",
+							"// });",
+							"",
+							"// pm.test(\"Error message present\", () => {",
+							"//     const res = pm.response.json();",
+							"//     pm.expect(res).to.have.property(\"error\");",
+							"// });",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/users/{{userId}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"users",
+						"{{userId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
